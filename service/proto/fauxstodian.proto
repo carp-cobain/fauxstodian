@@ -1,0 +1,46 @@
+// Copyright 2024 DART, Inc.
+//
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.figure.dart.markets.fauxstodian";
+option java_outer_classname = "FauxstodianProto";
+
+package fauxstodian;
+
+// The fake custodian service definition.
+service Fauxstodian {
+	// Create a new vault (PDA).
+	rpc CreateAccount (CreateAccountReq) returns (CreateAccountRep);
+
+    // Query for total lamports in a vault.
+	rpc GetBalance (GetBalanceReq) returns (GetBalanceRep);
+
+    // Change the owner of a vault.
+	rpc TransferOwnership (TransferOwnershipReq) returns (TransferOwnershipRep);
+
+    // Close a vault account; withdrawing all lamports to the owner.
+	rpc CloseAccount (CloseAccountReq) returns (CloseAccountRep);
+}
+
+// Create account 
+message CreateAccountReq {}
+message CreateAccountRep {}
+
+// Get balance 
+message GetBalanceReq {
+	string pub_key = 1;
+}
+message GetBalanceRep {
+	string pub_key = 1;
+    uint64 lamports = 2;
+}
+
+// Transfer ownership
+message TransferOwnershipReq {}
+message TransferOwnershipRep {}
+
+// Close account 
+message CloseAccountReq {}
+message CloseAccountRep {}
+

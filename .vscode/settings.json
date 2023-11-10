@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./programs/record/Cargo.toml",
+        "./programs/record/Cargo.toml",
+        "./programs/record/Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
+}
