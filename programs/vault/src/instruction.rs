@@ -1,5 +1,5 @@
-use borsh::{BorshDeserialize, BorshSerialize};
 use crate::id;
+use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
@@ -38,11 +38,7 @@ pub enum VaultInstruction {
 }
 
 /// Create a `VaultInstruction::Initialize` instruction
-pub fn initialize(
-    pda: &Pubkey,
-    dart: &Pubkey,
-    owner: &Pubkey,
-) -> Instruction {
+pub fn initialize(pda: &Pubkey, dart: &Pubkey, owner: &Pubkey) -> Instruction {
     Instruction::new_with_borsh(
         id(),
         &VaultInstruction::Initialize,
@@ -74,11 +70,7 @@ pub fn transfer_owner(
 }
 
 /// Create a `VaultInstruction::CloseAccount` instruction
-pub fn close_account(
-    pda: &Pubkey,
-    dart: &Pubkey,
-    owner: &Pubkey,
-) -> Instruction {
+pub fn close_account(pda: &Pubkey, dart: &Pubkey, owner: &Pubkey) -> Instruction {
     Instruction::new_with_borsh(
         id(),
         &VaultInstruction::CloseAccount,
