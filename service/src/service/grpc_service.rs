@@ -1,33 +1,15 @@
-use std::error::Error;
+use tonic::{Request, Response, Status};
 
-use tonic::{transport::Server, Request, Response, Status};
-
-use fauxstodian::fauxstodian_server::{Fauxstodian, FauxstodianServer};
-use fauxstodian::{
+use crate::proto::fauxstodian_server::Fauxstodian;
+use crate::proto::{
     CloseAccountRep, CloseAccountReq, CreateAccountRep, CreateAccountReq, GetBalanceRep,
     GetBalanceReq, TransferOwnershipRep, TransferOwnershipReq,
 };
 
-use solana_client::rpc_client::RpcClient;
-use solana_sdk::pubkey::Pubkey;
-use std::str::FromStr;
-
-pub mod fauxstodian {
-    tonic::include_proto!("fauxstodian");
-}
-
-pub struct FauxstodianService {
-    pub rpc: RpcClient,
-}
-
-impl FauxstodianService {
-    fn new(rpc: RpcClient) -> Self {
-        Self { rpc }
-    }
-}
+use super::Service;
 
 #[tonic::async_trait]
-impl Fauxstodian for FauxstodianService {
+impl Fauxstodian for Service {
     /// Create a new account backed by a solana vault.
     async fn create_account(
         &self,
@@ -48,16 +30,12 @@ impl Fauxstodian for FauxstodianService {
         request: Request<GetBalanceReq>,
     ) -> Result<Response<GetBalanceRep>, Status> {
         println!("Got a get balance request from {:?}", request.remote_addr());
-
-        let pub_key = &Pubkey::from_str(&request.get_ref().pub_key).unwrap();
-        let lamports = self.rpc.get_account(pub_key).unwrap().lamports;
-
-        let reply = GetBalanceRep {
+        let pub_key = self.parse_pub_key(&request.get_ref().pub_key)?;
+        let lamports = self.get_account_balance(&pub_key).await?;
+        Ok(Response::new(GetBalanceRep {
             pub_key: pub_key.to_string(),
             lamports,
-        };
-
-        Ok(Response::new(reply))
+        }))
     }
 
     /// Transfer ownership of a solana vault.
@@ -87,23 +65,4 @@ impl Fauxstodian for FauxstodianService {
         let reply = CloseAccountRep {};
         Ok(Response::new(reply))
     }
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    // TODO: Read strings from env var config...
-    let listen_addr = "0.0.0.0:50055".parse().unwrap();
-    let solana_addr = "http://127.0.0.1:8899";
-
-    let rpc = RpcClient::new(solana_addr);
-    let service = FauxstodianService::new(rpc);
-
-    println!("Fauxstodian server listening on {}", listen_addr);
-
-    Server::builder()
-        .add_service(FauxstodianServer::new(service))
-        .serve(listen_addr)
-        .await?;
-
-    Ok(())
 }
