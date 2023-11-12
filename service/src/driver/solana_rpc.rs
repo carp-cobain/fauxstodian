@@ -1,6 +1,8 @@
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 
+use super::SolanaDriver;
+
 pub struct SolanaRpc {
     rpc_client: RpcClient,
 }
@@ -23,5 +25,12 @@ impl SolanaRpc {
             Ok(account) => Ok(account.lamports),
             Err(err) => Err(err.to_string()),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl SolanaDriver for SolanaRpc {
+    async fn get_balance(&self, pub_key: &Pubkey) -> Result<u64, String> {
+        self.get_account_balance(pub_key)
     }
 }
