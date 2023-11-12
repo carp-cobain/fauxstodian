@@ -4,7 +4,7 @@ use tonic::Status;
 
 use super::Service;
 
-// Pubkey & account helpers
+// Pubkey helper
 impl Service {
     /// Parse public key from a string; mapping errors to a gRPC status.
     pub fn parse_pub_key(&self, key_str: &str) -> Result<Pubkey, Status> {

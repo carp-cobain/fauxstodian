@@ -30,12 +30,7 @@ impl Fauxstodian for Service {
         request: Request<GetBalanceReq>,
     ) -> Result<Response<GetBalanceRep>, Status> {
         println!("Got a get balance request from {:?}", request.remote_addr());
-        let pub_key = self.parse_pub_key(&request.get_ref().pub_key)?;
-        let lamports = self.get_account_balance(&pub_key).await?;
-        Ok(Response::new(GetBalanceRep {
-            pub_key: pub_key.to_string(),
-            lamports,
-        }))
+        self.get_account_balance(request.into_inner())
     }
 
     /// Transfer ownership of a solana vault.

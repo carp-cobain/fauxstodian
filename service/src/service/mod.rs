@@ -1,16 +1,16 @@
-use solana_client::rpc_client::RpcClient;
+use crate::driver::SolanaRpcDriver;
 
 mod get_account_balance;
 mod grpc_service;
 mod parse_pub_key;
 
 pub struct Service {
-    rpc: RpcClient,
+    driver: SolanaRpcDriver,
 }
 
 // Constructor
 impl Service {
-    pub fn new(rpc: RpcClient) -> Self {
-        Self { rpc }
+    pub fn new(driver: SolanaRpcDriver) -> Self {
+        Self { driver }
     }
 }
