@@ -1,10 +1,9 @@
-use tonic::{Request, Response, Status};
-
 use crate::proto::fauxstodian_server::Fauxstodian;
 use crate::proto::{
     CloseAccountRep, CloseAccountReq, CreateAccountRep, CreateAccountReq, GetBalanceRep,
     GetBalanceReq, TransferOwnershipRep, TransferOwnershipReq,
 };
+use tonic::{Request, Response, Status};
 
 use super::Service;
 
@@ -30,7 +29,7 @@ impl Fauxstodian for Service {
         request: Request<GetBalanceReq>,
     ) -> Result<Response<GetBalanceRep>, Status> {
         println!("Got a get balance request from {:?}", request.remote_addr());
-        self.get_account_balance(request.into_inner())
+        self.get_account_balance(request.into_inner()).await
     }
 
     /// Transfer ownership of a solana vault.
