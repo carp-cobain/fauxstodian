@@ -1,4 +1,3 @@
-use solana_client::rpc_client::RpcClient;
 use std::error::Error;
 use std::sync::Arc;
 use tonic::transport::Server;
@@ -11,10 +10,9 @@ use fauxstodian::service::Service;
 async fn main() -> Result<(), Box<dyn Error>> {
     // TODO: Read strings from env var config...
     let listen_addr = "0.0.0.0:50055".parse().unwrap();
-    let solana_addr = "http://127.0.0.1:8899";
+    let solana_url = "http://127.0.0.1:8899";
 
-    let rpc_client = RpcClient::new(solana_addr);
-    let rpc = SolanaRpc::new(rpc_client);
+    let rpc = SolanaRpc::new(solana_url);
     let driver = Arc::new(Box::new(rpc) as Box<dyn SolanaDriver>);
     let service = Service::new(Arc::clone(&driver));
 

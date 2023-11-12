@@ -1,7 +1,5 @@
 use solana_sdk::pubkey::Pubkey;
 
-mod get_account_balance;
-
 pub mod solana_rpc;
 
 #[async_trait::async_trait]
