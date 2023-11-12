@@ -1,16 +1,22 @@
 use crate::driver::SolanaDriver;
 use std::sync::Arc;
 
-mod get_account_balance;
-mod grpc_service;
-mod parse_pub_key;
+pub use error::Error;
 
+mod core;
+mod error;
+mod helpers;
+
+/// Result type to simplify service function signatures.
+pub type Result<T> = std::result::Result<T, Error>;
+
+/// Service encapsulates the business logic for fauxstodian.
 pub struct Service {
     driver: Arc<Box<dyn SolanaDriver>>,
 }
 
-// Constructor
 impl Service {
+    /// Service constructor.
     pub fn new(driver: Arc<Box<dyn SolanaDriver>>) -> Self {
         Self { driver }
     }
