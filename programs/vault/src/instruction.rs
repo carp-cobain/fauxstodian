@@ -87,12 +87,6 @@ mod tests {
     use super::*;
     use solana_program::program_error::ProgramError;
 
-    /// very small data for easy testing
-    const DATA_SIZE: usize = 8;
-
-    /// Bytes for tests
-    const TEST_BYTES: [u8; DATA_SIZE] = [42; DATA_SIZE];
-
     #[test]
     fn serialize_initialize() {
         let instruction = VaultInstruction::Initialize;
@@ -128,8 +122,7 @@ mod tests {
 
     #[test]
     fn deserialize_invalid_instruction() {
-        let mut expected = vec![12];
-        expected.append(&mut TEST_BYTES.try_to_vec().unwrap());
+        let expected = vec![12]; // Invalid instruction numeric
         let err: ProgramError = VaultInstruction::try_from_slice(&expected)
             .unwrap_err()
             .into();

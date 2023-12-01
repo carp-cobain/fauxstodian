@@ -1,6 +1,6 @@
 # fauxstodian
-A fake solana custodian (grpc service) with vault program.
+A fake DART custodian service with vault solana program.
 
 ## Status
 
-Incomplete. Work in progress.
+Incomplete - this is a work in progress.

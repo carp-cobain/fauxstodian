@@ -1,4 +1,7 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tonic_build::compile_protos("proto/fauxstodian.proto")?;
+    tonic_build::configure()
+        .build_client(false)
+        .build_server(true)
+        .compile(&["proto/fauxstodian.proto"], &["proto"])?;
     Ok(())
 }
