@@ -1,8 +1,8 @@
 /// Solana driver errors.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("error getting account balance: {0}")]
-    GetVaultBalanceError(String),
+    #[error("error getting vault account: {0}")]
+    GetVaultAccountError(String),
     #[error("error creating public key from seed: {0}")]
     PubkeyWithSeedError(String),
     #[error("error getting latest blockhash: {0}")]

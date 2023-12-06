@@ -1,26 +1,28 @@
-use crate::entity::{Account, Balance, Signature};
+use crate::entity::{Balance, Signature, VaultAccount};
 
 use super::{Result, Service};
 
 impl Service {
     /// Create and initialize a solana vault PDA.
-    pub async fn create_account(&self, seed: &str, owner: &str) -> Result<Account> {
+    pub async fn create_account(&self, seed: &str, owner: &str) -> Result<VaultAccount> {
+        let seed = self.validate_seed(seed)?;
         let owner = self.parse_pubkey(owner)?;
-        let pda = self.driver.create_vault(seed, &owner).await?;
-        Ok(Account {
-            seed: seed.to_string(),
-            owner: owner.to_string(),
+        let (pda, signature) = self.driver.create_vault(&seed, &owner).await?;
+        Ok(VaultAccount {
             pda: pda.to_string(),
+            signature: Some(Signature {
+                hash: signature.to_string(),
+            }),
         })
     }
 
     /// Query for solana account balance.
-    pub async fn get_balance(&self, key_str: &str) -> Result<Balance> {
-        let pda = self.parse_pubkey(&key_str)?;
-        let lamports = self.driver.get_vault_balance(&pda).await?;
+    pub async fn get_balance(&self, pda: &str) -> Result<Balance> {
+        let pda = self.parse_pubkey(&pda)?;
+        let account = self.driver.get_vault_account(&pda).await?;
         Ok(Balance {
-            pub_key: key_str.to_string(),
-            lamports,
+            pda: pda.to_string(),
+            lamports: account.lamports,
         })
     }
 
@@ -34,18 +36,22 @@ impl Service {
         let pda = self.parse_pubkey(pda)?;
         let owner = self.parse_pubkey(owner)?;
         let new_owner = self.parse_pubkey(new_owner)?;
-        let hash = self
+        let signature = self
             .driver
             .change_vault_owner(&pda, &owner, &new_owner)
             .await?;
-        Ok(Signature { hash })
+        Ok(Signature {
+            hash: signature.to_string(),
+        })
     }
 
     /// Close a vault PDA.
     pub async fn close_account(&self, pda: &str, owner: &str) -> Result<Signature> {
         let pda = self.parse_pubkey(pda)?;
         let owner = self.parse_pubkey(owner)?;
-        let hash = self.driver.close_vault(&pda, &owner).await?;
-        Ok(Signature { hash })
+        let signature = self.driver.close_vault(&pda, &owner).await?;
+        Ok(Signature {
+            hash: signature.to_string(),
+        })
     }
 }
