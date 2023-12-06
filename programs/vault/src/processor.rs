@@ -101,8 +101,12 @@ impl Processor {
             return Err(ProgramError::UninitializedAccount);
         }
 
+        // Ensure the current owner on record is correct.
+        if record.owner != *owner.key {
+            return Err(ProgramError::IllegalOwner);
+        }
+
         validate_signer(dart, &record.dart)?;
-        validate_signer(owner, &record.owner)?;
 
         record.owner = *new_owner.key;
 
@@ -128,8 +132,13 @@ impl Processor {
             return Err(ProgramError::UninitializedAccount);
         }
 
+        // Ensure the intermediary signed off on the withdrawal
         validate_signer(dart, &record.dart)?;
-        validate_signer(owner, &record.owner)?;
+
+        // Ensure the owner on record is correct.
+        if record.owner != *owner.key {
+            return Err(ProgramError::IllegalOwner);
+        }
 
         let owner_starting_lamports = owner.lamports();
         let pda_lamports = pda.lamports();
