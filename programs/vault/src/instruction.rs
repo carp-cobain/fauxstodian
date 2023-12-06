@@ -63,7 +63,7 @@ pub fn transfer_owner(
         vec![
             AccountMeta::new(*pda, false),
             AccountMeta::new_readonly(*dart, true),
-            AccountMeta::new_readonly(*owner, true),
+            AccountMeta::new_readonly(*owner, false),
             AccountMeta::new_readonly(*new_owner, false),
         ],
     )
@@ -77,7 +77,7 @@ pub fn close_account(pda: &Pubkey, dart: &Pubkey, owner: &Pubkey) -> Instruction
         vec![
             AccountMeta::new(*pda, false),
             AccountMeta::new_readonly(*dart, true),
-            AccountMeta::new(*owner, true),
+            AccountMeta::new(*owner, false),
         ],
     )
 }

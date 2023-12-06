@@ -9,7 +9,7 @@ use {
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
     },
-    vault::{error::VaultError, id, instruction, processor::Processor, state::VaultRecord},
+    vault::{id, instruction, processor::Processor, state::VaultRecord},
 };
 
 fn program_test() -> ProgramTest {
@@ -170,7 +170,7 @@ async fn transfer_owner_success() {
             &new_owner.pubkey(),
         )],
         Some(&context.payer.pubkey()),
-        &[&context.payer, &dart, &owner],
+        &[&context.payer, &dart],
         context.last_blockhash,
     );
     context
@@ -213,7 +213,7 @@ async fn transfer_owner_fail_wrong_owner() {
             &new_owner.pubkey(),
         )],
         Some(&context.payer.pubkey()),
-        &[&context.payer, &dart, &wrong_owner],
+        &[&context.payer, &dart],
         context.last_blockhash,
     );
 
@@ -224,10 +224,7 @@ async fn transfer_owner_fail_wrong_owner() {
             .await
             .unwrap_err()
             .unwrap(),
-        TransactionError::InstructionError(
-            0,
-            InstructionError::Custom(VaultError::IncorrectAccountKey as u32)
-        )
+        TransactionError::InstructionError(0, InstructionError::IllegalOwner)
     );
 }
 
@@ -248,7 +245,7 @@ async fn close_account_success() {
             &owner.pubkey(),
         )],
         Some(&context.payer.pubkey()),
-        &[&context.payer, &dart, &owner],
+        &[&context.payer, &dart],
         context.last_blockhash,
     );
     context
@@ -287,7 +284,7 @@ async fn close_account_fail_wrong_owner() {
             &wrong_owner.pubkey(),
         )],
         Some(&context.payer.pubkey()),
-        &[&context.payer, &dart, &wrong_owner],
+        &[&context.payer, &dart],
         context.last_blockhash,
     );
     assert_eq!(
@@ -297,9 +294,6 @@ async fn close_account_fail_wrong_owner() {
             .await
             .unwrap_err()
             .unwrap(),
-        TransactionError::InstructionError(
-            0,
-            InstructionError::Custom(VaultError::IncorrectAccountKey as u32)
-        )
+        TransactionError::InstructionError(0, InstructionError::IllegalOwner)
     );
 }
