@@ -56,7 +56,10 @@ message TransferOwnershipReq {
     // new owner
     string new_owner = 3;
 }
-message TransferOwnershipRep {}
+message TransferOwnershipRep {
+    // solana tx signature
+    string signature = 1;
+}
 
 // Close account 
 message CloseAccountReq {
@@ -65,4 +68,7 @@ message CloseAccountReq {
     // current owner
     string owner = 2;
 }
-message CloseAccountRep {}
+message CloseAccountRep {
+    // solana tx signature
+    string signature = 1;
+}

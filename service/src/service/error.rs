@@ -8,8 +8,8 @@ pub enum Error {
     ParsePubkeyError { message: String },
     #[error("error calling solana driver: {message}")]
     DriverError { message: String },
-    #[error("not implemented")]
-    Todo,
+    #[error("invalid seed string")]
+    InvalidSeed,
 }
 
 /// Convert a core driver error into a service level driver error.

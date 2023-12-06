@@ -24,7 +24,7 @@ impl From<Error> for Status {
         match err {
             Error::ParsePubkeyError { message } => Status::invalid_argument(message),
             Error::DriverError { message } => Status::internal(message),
-            Error::Todo => Status::unimplemented(Error::Todo.to_string()),
+            Error::InvalidSeed => Status::invalid_argument(Error::InvalidSeed.to_string()),
         }
     }
 }
@@ -39,9 +39,13 @@ impl Fauxstodian for FauxstodianApi {
         println!("Create account request from {:?}", request.remote_addr());
         let inner = request.get_ref();
         match self.service.create_account(&inner.seed, &inner.owner).await {
-            Ok(account) => Ok(Response::new(CreateAccountRep {
-                deposit_address: account.pda,
-            })),
+            Ok(account) => {
+                let signature = account.signature_hash();
+                println!("Created account; signature = {signature}");
+                Ok(Response::new(CreateAccountRep {
+                    deposit_address: account.pda,
+                }))
+            }
             Err(err) => Err(err.into()),
         }
     }
@@ -54,7 +58,7 @@ impl Fauxstodian for FauxstodianApi {
         println!("Get balance request from {:?}", request.remote_addr());
         match self.service.get_balance(&request.get_ref().pub_key).await {
             Ok(balance) => Ok(Response::new(GetBalanceRep {
-                pub_key: balance.pub_key,
+                pub_key: balance.pda,
                 lamports: balance.lamports,
             })),
             Err(err) => Err(err.into()),
@@ -75,7 +79,12 @@ impl Fauxstodian for FauxstodianApi {
             .service
             .transfer_ownership(&inner.pda, &inner.owner, &inner.new_owner);
         match future.await {
-            Ok(_) => Ok(Response::new(TransferOwnershipRep {})),
+            Ok(signature) => {
+                println!("Transfer success; signature = {:?}", signature.hash);
+                Ok(Response::new(TransferOwnershipRep {
+                    signature: signature.hash,
+                }))
+            }
             Err(err) => Err(err.into()),
         }
     }
@@ -87,9 +96,13 @@ impl Fauxstodian for FauxstodianApi {
     ) -> Result<Response<CloseAccountRep>, Status> {
         println!("Close account request from {:?}", request.remote_addr());
         let inner = request.into_inner();
-        let future = self.service.close_account(&inner.pda, &inner.owner);
-        match future.await {
-            Ok(_) => Ok(Response::new(CloseAccountRep {})),
+        match self.service.close_account(&inner.pda, &inner.owner).await {
+            Ok(signature) => {
+                println!("Account closed; signature = {:?}", signature.hash);
+                Ok(Response::new(CloseAccountRep {
+                    signature: signature.hash,
+                }))
+            }
             Err(err) => Err(err.into()),
         }
     }
