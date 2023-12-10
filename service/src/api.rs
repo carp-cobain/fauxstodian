@@ -22,9 +22,8 @@ impl FauxstodianApi {
 impl From<Error> for Status {
     fn from(err: Error) -> Self {
         match err {
-            Error::ParsePubkeyError { message } => Status::invalid_argument(message),
-            Error::DriverError { message } => Status::internal(message),
-            Error::InvalidSeed => Status::invalid_argument(Error::InvalidSeed.to_string()),
+            Error::InvalidArgument { message } => Status::invalid_argument(message),
+            Error::InternalError { message } => Status::internal(message),
         }
     }
 }
@@ -37,8 +36,8 @@ impl Fauxstodian for FauxstodianApi {
         request: Request<CreateAccountReq>,
     ) -> Result<Response<CreateAccountRep>, Status> {
         println!("Create account request from {:?}", request.remote_addr());
-        let inner = request.get_ref();
-        match self.service.create_account(&inner.seed, &inner.owner).await {
+        let reqr = request.get_ref();
+        match self.service.create_account(&reqr.seed, &reqr.owner).await {
             Ok(account) => {
                 let signature = account.signature_hash();
                 println!("Created account; signature = {signature}");
@@ -74,10 +73,10 @@ impl Fauxstodian for FauxstodianApi {
             "Transfer ownership request from {:?}",
             request.remote_addr()
         );
-        let inner = request.into_inner();
+        let reqr = request.get_ref();
         let future = self
             .service
-            .transfer_ownership(&inner.pda, &inner.owner, &inner.new_owner);
+            .transfer_ownership(&reqr.pda, &reqr.owner, &reqr.new_owner);
         match future.await {
             Ok(signature) => {
                 println!("Transfer success; signature = {:?}", signature.hash);
@@ -95,8 +94,8 @@ impl Fauxstodian for FauxstodianApi {
         request: Request<CloseAccountReq>,
     ) -> Result<Response<CloseAccountRep>, Status> {
         println!("Close account request from {:?}", request.remote_addr());
-        let inner = request.into_inner();
-        match self.service.close_account(&inner.pda, &inner.owner).await {
+        let reqr = request.get_ref();
+        match self.service.close_account(&reqr.pda, &reqr.owner).await {
             Ok(signature) => {
                 println!("Account closed; signature = {:?}", signature.hash);
                 Ok(Response::new(CloseAccountRep {

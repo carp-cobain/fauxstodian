@@ -11,8 +11,12 @@ impl Service {
 
     /// Ensure seed string is between 1 and 32 (inclusive) bytes.
     pub(crate) fn validate_seed(&self, seed: &str) -> Result<String> {
-        if seed.is_empty() || seed.len() > solana_sdk::pubkey::MAX_SEED_LEN {
-            Err(Error::InvalidSeed)
+        let seed = seed.trim();
+        let seed_len = seed.len();
+        if seed.is_empty() || seed_len > solana_sdk::pubkey::MAX_SEED_LEN {
+            Err(Error::InvalidArgument {
+                message: "invalid seed length: {seed_len}".to_string(),
+            })
         } else {
             Ok(String::from(seed))
         }

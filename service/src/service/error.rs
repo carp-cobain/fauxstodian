@@ -4,18 +4,16 @@ use solana_sdk::pubkey::ParsePubkeyError;
 /// Service level errors.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("error parsing public key: {message}")]
-    ParsePubkeyError { message: String },
-    #[error("error calling solana driver: {message}")]
-    DriverError { message: String },
-    #[error("invalid seed string")]
-    InvalidSeed,
+    #[error("invalid argument: {message}")]
+    InvalidArgument { message: String },
+    #[error("internal error: {message}")]
+    InternalError { message: String },
 }
 
 /// Convert a core driver error into a service level driver error.
 impl From<DriverError> for Error {
     fn from(error: DriverError) -> Self {
-        Error::DriverError {
+        Error::InternalError {
             message: error.to_string(),
         }
     }
@@ -24,7 +22,7 @@ impl From<DriverError> for Error {
 /// Convert a Solana sdk public key parsing error into a service level error.
 impl From<ParsePubkeyError> for Error {
     fn from(error: ParsePubkeyError) -> Self {
-        Error::ParsePubkeyError {
+        Error::InvalidArgument {
             message: error.to_string(),
         }
     }
