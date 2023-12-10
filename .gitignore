@@ -1,5 +1,7 @@
 /target
 .vscode
+.envrc
 
 # Test key-pairs
 dart.json
+keypair.json
