@@ -1,5 +1,5 @@
 pub mod proto {
-    tonic::include_proto!("fauxstodian");
+    tonic::include_proto!("fauxstodian.v1");
 }
 
 pub mod api;
