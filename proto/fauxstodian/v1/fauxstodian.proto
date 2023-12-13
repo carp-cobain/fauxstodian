@@ -1,0 +1,70 @@
+// Copyright 2024 Figure Technologies.
+//
+syntax = "proto3";
+
+package fauxstodian.v1;
+
+// The fake Solana custodian service definition.
+service FauxstodianService {
+  // Create a new vault (PDA).
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+
+  // Query for total lamports in a vault.
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+
+  // Change the owner of a vault.
+  rpc TransferOwnership(TransferOwnershipRequest) returns (TransferOwnershipResponse);
+
+  // Close a vault account; withdrawing all lamports to the owner.
+  rpc CloseAccount(CloseAccountRequest) returns (CloseAccountResponse);
+}
+
+// Create account
+message CreateAccountRequest {
+  // seed string (max 32 chars)
+  string seed = 1;
+  // the initial vault owner
+  string owner = 2;
+}
+message CreateAccountResponse {
+  // the created vault record address (pda)
+  string deposit_address = 1;
+}
+
+// Get balance
+message GetBalanceRequest {
+  // the account public key to get balance for
+  string pub_key = 1;
+}
+message GetBalanceResponse {
+  // the account public key (input param)
+  string pub_key = 1;
+  // the account balance
+  uint64 lamports = 2;
+}
+
+// Transfer ownership
+message TransferOwnershipRequest {
+  // vault record address (pda)
+  string pda = 1;
+  // current owner
+  string owner = 2;
+  // new owner
+  string new_owner = 3;
+}
+message TransferOwnershipResponse {
+  // solana tx signature
+  string signature = 1;
+}
+
+// Close account
+message CloseAccountRequest {
+  // vault record address (pda)
+  string pda = 1;
+  // current owner
+  string owner = 2;
+}
+message CloseAccountResponse {
+  // solana tx signature
+  string signature = 1;
+}

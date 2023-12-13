@@ -12,7 +12,7 @@ pub use rpc::SolanaRpc;
 /// Driver return type
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// Async driver trait for the Solana blockchain.
+/// Async driver trait for the Solana vault program.
 #[async_trait::async_trait]
 pub trait SolanaDriver: Send + Sync {
     /// Create a new vault.

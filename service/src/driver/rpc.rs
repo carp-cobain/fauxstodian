@@ -10,16 +10,16 @@ use super::{Error, Result, SolanaDriver};
 /// The concrete driver type for interacting with the Solana vault program via JSON-RPC.
 pub struct SolanaRpc {
     rpc_client: RpcClient,
-    dart_keys: Keypair,
+    signing_keys: Keypair,
 }
 
 impl SolanaRpc {
     /// Create a new Solana JSON-RPC driver.
-    pub fn new<U: ToString>(url: U, dart_keys: Keypair) -> Self {
+    pub fn new<U: ToString>(url: U, signing_keys: Keypair) -> Self {
         let rpc_client = RpcClient::new(url);
         Self {
             rpc_client,
-            dart_keys,
+            signing_keys,
         }
     }
 
@@ -33,7 +33,7 @@ impl SolanaRpc {
 impl SolanaDriver for SolanaRpc {
     /// Create a new vault with the given seed and owner.
     async fn create_vault(&self, seed: &str, owner: &Pubkey) -> Result<(Pubkey, Signature)> {
-        let dart = &self.dart_keys.pubkey();
+        let dart = &self.signing_keys.pubkey();
         let (space, lamports) = self.calculate_rent();
 
         // Generate the deposit address
@@ -58,7 +58,7 @@ impl SolanaDriver for SolanaRpc {
         let transaction = Transaction::new_signed_with_payer(
             instructions,
             Some(dart),
-            &[&self.dart_keys],
+            &[&self.signing_keys],
             self.get_latest_blockhash()?,
         );
 
@@ -87,12 +87,12 @@ impl SolanaDriver for SolanaRpc {
         owner: &Pubkey,
         new_owner: &Pubkey,
     ) -> Result<Signature> {
-        let dart = &self.dart_keys.pubkey();
+        let dart = &self.signing_keys.pubkey();
 
         let transaction = Transaction::new_signed_with_payer(
             &[instruction::transfer_owner(&pda, &dart, &owner, &new_owner)],
             Some(dart),
-            &[&self.dart_keys],
+            &[&self.signing_keys],
             self.get_latest_blockhash()?,
         );
 
@@ -106,12 +106,12 @@ impl SolanaDriver for SolanaRpc {
 
     /// Close a vault and drain lamports to the current owner.
     async fn close_vault(&self, pda: &Pubkey, owner: &Pubkey) -> Result<Signature> {
-        let dart = &self.dart_keys.pubkey();
+        let dart = &self.signing_keys.pubkey();
 
         let transaction = Transaction::new_signed_with_payer(
             &[instruction::close_account(pda, dart, owner)],
             Some(dart),
-            &[&self.dart_keys],
+            &[&self.signing_keys],
             self.get_latest_blockhash()?,
         );
 

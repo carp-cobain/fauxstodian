@@ -1,9 +1,10 @@
-use crate::proto::fauxstodian_server::Fauxstodian;
+use crate::proto::fauxstodian_service_server::FauxstodianService;
 use crate::proto::{
-    CloseAccountRep, CloseAccountReq, CreateAccountRep, CreateAccountReq, GetBalanceRep,
-    GetBalanceReq, TransferOwnershipRep, TransferOwnershipReq,
+    CloseAccountRequest, CloseAccountResponse, CreateAccountRequest, CreateAccountResponse,
+    GetBalanceRequest, GetBalanceResponse, TransferOwnershipRequest, TransferOwnershipResponse,
 };
 use crate::service::{Error, Service};
+use log::info;
 use tonic::{Request, Response, Status};
 
 /// Define the fauxstodian API type.
@@ -29,19 +30,19 @@ impl From<Error> for Status {
 }
 
 #[tonic::async_trait]
-impl Fauxstodian for FauxstodianApi {
+impl FauxstodianService for FauxstodianApi {
     /// Create a new account backed by a solana vault.
     async fn create_account(
         &self,
-        request: Request<CreateAccountReq>,
-    ) -> Result<Response<CreateAccountRep>, Status> {
-        println!("Create account request from {:?}", request.remote_addr());
+        request: Request<CreateAccountRequest>,
+    ) -> Result<Response<CreateAccountResponse>, Status> {
+        info!("Create account request from {:?}", request.remote_addr());
         let reqr = request.get_ref();
         match self.service.create_account(&reqr.seed, &reqr.owner).await {
             Ok(account) => {
                 let signature = account.signature_hash();
-                println!("Created account; signature = {signature}");
-                Ok(Response::new(CreateAccountRep {
+                info!("Created account; signature = {signature}");
+                Ok(Response::new(CreateAccountResponse {
                     deposit_address: account.pda,
                 }))
             }
@@ -52,11 +53,11 @@ impl Fauxstodian for FauxstodianApi {
     /// Get the number of lamports in a solana account.
     async fn get_balance(
         &self,
-        request: Request<GetBalanceReq>,
-    ) -> Result<Response<GetBalanceRep>, Status> {
-        println!("Get balance request from {:?}", request.remote_addr());
+        request: Request<GetBalanceRequest>,
+    ) -> Result<Response<GetBalanceResponse>, Status> {
+        info!("Get balance request from {:?}", request.remote_addr());
         match self.service.get_balance(&request.get_ref().pub_key).await {
-            Ok(balance) => Ok(Response::new(GetBalanceRep {
+            Ok(balance) => Ok(Response::new(GetBalanceResponse {
                 pub_key: balance.pda,
                 lamports: balance.lamports,
             })),
@@ -67,9 +68,9 @@ impl Fauxstodian for FauxstodianApi {
     /// Transfer ownership of a solana vault.
     async fn transfer_ownership(
         &self,
-        request: Request<TransferOwnershipReq>,
-    ) -> Result<Response<TransferOwnershipRep>, Status> {
-        println!(
+        request: Request<TransferOwnershipRequest>,
+    ) -> Result<Response<TransferOwnershipResponse>, Status> {
+        info!(
             "Transfer ownership request from {:?}",
             request.remote_addr()
         );
@@ -79,8 +80,8 @@ impl Fauxstodian for FauxstodianApi {
             .transfer_ownership(&reqr.pda, &reqr.owner, &reqr.new_owner);
         match future.await {
             Ok(signature) => {
-                println!("Transfer success; signature = {:?}", signature.hash);
-                Ok(Response::new(TransferOwnershipRep {
+                info!("Transfer success; signature = {:?}", signature.hash);
+                Ok(Response::new(TransferOwnershipResponse {
                     signature: signature.hash,
                 }))
             }
@@ -91,14 +92,14 @@ impl Fauxstodian for FauxstodianApi {
     /// Close an account, withdrawing all lamports to the vault owner.
     async fn close_account(
         &self,
-        request: Request<CloseAccountReq>,
-    ) -> Result<Response<CloseAccountRep>, Status> {
-        println!("Close account request from {:?}", request.remote_addr());
+        request: Request<CloseAccountRequest>,
+    ) -> Result<Response<CloseAccountResponse>, Status> {
+        info!("Close account request from {:?}", request.remote_addr());
         let reqr = request.get_ref();
         match self.service.close_account(&reqr.pda, &reqr.owner).await {
             Ok(signature) => {
-                println!("Account closed; signature = {:?}", signature.hash);
-                Ok(Response::new(CloseAccountRep {
+                info!("Account closed; signature = {:?}", signature.hash);
+                Ok(Response::new(CloseAccountResponse {
                     signature: signature.hash,
                 }))
             }
