@@ -122,4 +122,11 @@ impl SolanaDriver for SolanaRpc {
 
         Ok(signature)
     }
+
+    /// Check the solana connection.
+    async fn health_check(&self) -> Result<()> {
+        self.rpc_client
+            .get_health()
+            .map_err(|err| Error::HealthCheckError(err.kind.to_string()))
+    }
 }

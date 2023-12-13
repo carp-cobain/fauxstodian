@@ -31,4 +31,7 @@ pub trait SolanaDriver: Send + Sync {
 
     /// Close an existing vault.
     async fn close_vault(&self, pda: &Pubkey, owner: &Pubkey) -> Result<Signature>;
+
+    /// Check the solana connection.
+    async fn health_check(&self) -> Result<()>;
 }
