@@ -13,4 +13,6 @@ pub enum Error {
     CloseVaultError(String),
     #[error("error changing vault owner: {0}")]
     ChangeVaultOwnerError(String),
+    #[error("error checking solana rpc health: {0}")]
+    HealthCheckError(String),
 }
